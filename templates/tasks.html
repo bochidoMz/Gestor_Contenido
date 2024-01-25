@@ -93,8 +93,12 @@
           <label>Observaciones</label>
           <textarea class="form-control mb-3" rows="5" name="observaciones"></textarea>
 
-          
-          <button type="submit" class="btn btn-primary w-100">Guardar</button>
+          {% if message %}
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>ERROR</strong> {{ message }}
+            <button type="button" class="btm-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endif %}
         </form>
       </div>
     </div>
