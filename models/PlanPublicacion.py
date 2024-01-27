@@ -25,4 +25,4 @@ def agregar_plan():
         finally:
             cursor.close
 
-        return "Plan guardado exitosamente"
+        return  "Guardado Correctamente" 

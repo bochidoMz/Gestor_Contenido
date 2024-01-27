@@ -19,7 +19,7 @@ def login():
     password = request.form['password']
 
     cur = db.conection.cursor(dictionary=True)
-    query = "SELECT u.id, u.nombreU, u.apellidoU, l.contraseña FROM usuario u JOIN login l ON u.id = l.idUsuario WHERE l.correoElectronico = %s"
+    query = "SELECT u.id, u.nombreU, u.apellidoU, u.idRol, l.contraseña FROM usuario u JOIN login l ON u.id = l.idUsuario WHERE l.correoElectronico = %s"
     cur.execute(query, (email,))
 
     user = cur.fetchone()
@@ -30,14 +30,30 @@ def login():
         session['name'] = user['nombreU']
         session['surnames'] = user['apellidoU']
 
-        return redirect(url_for('task'))
+        if user['idRol'] == 1:
+            return redirect(url_for('task'))
+        elif user['idRol'] == 2:
+            return redirect(url_for('admin'))
+        elif user['idRol'] == 3:
+            return redirect(url_for('manager'))
+        else:
+            return render_template('index.html', message="Rol no reconocido")
+
     else:
         return render_template('index.html', message="Las credenciales no son correctas")
     
-    
+#esto es para dirigirnos a la tarea de usuario  
 @app.route('/tasks', methods = ['GET'])
 def task():
     return render_template('tasks.html')
+#esto es para dirigirnos al perfil del Administrador
+@app.route('/admin', methods = ['GET'])
+def admin():
+    return render_template('admin.html')
+#esto es para dirigirnos al perfil del Manager
+@app.route('/manager', methods = ['GET'])
+def manager():
+    return render_template('manager.html')
     
 @app.route('/logout') #esto es para el cierre de cesion
 def logout():
