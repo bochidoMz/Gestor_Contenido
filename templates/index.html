@@ -24,20 +24,16 @@
                         <input type="password" class="form-control mb-3" name="password">
                         
                         {% if message %}
-
                            <div class="alert alert-danger alert-dismissible fade show" role="aler">
                             <strong>ERROR</strong>{{message}}
                             <button type="button" class="btm-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                
                            </div>
-
                         {% endif %}
-
-                        <button type="submit" class="btn btn-primary w-100">Acceder</button>
+                            <button type="submit" class="btn btn-primary w-100 mb-2">Acceder</button>
                     </form>
 
                     <form action="{{url_for('registro')}}" method="get">
-                        <button type="submit" class="btn btn-primary w-100">Registrarse</button>
+                        <button type="submit" class="btn btn-primary w-100" >Registrarse</button>
                     </form>
                 </div>
             </div>
