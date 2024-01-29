@@ -14,5 +14,131 @@
             <span>Bienvenido/a Administrador/a {{session['name']}} {{session['surnames']}}<a href="{{url_for('logout')}}" class="mx-3">Cerrar sesiòn</a></span>
         </div>
     </nav>
+
+       
+    <!-- Menu -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Administrador</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#">Inicio</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Empresas</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Usuario
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <li><a class="dropdown-item" href="#">Agregar</a></li>
+                  <li><a class="dropdown-item" href="#">Editar</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="#">Something else here</a></li>
+                </ul>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+              </li>
+            </ul>
+            <form class="d-flex">
+              <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+              <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+          </div>
+        </div>
+      </nav>
+  
+      <div class="container">
+          <div class="card mt-3 w-25 mx-auto d-block">
+              <div class="card-body d-flex">
+                  <img src="{{url_for('static', filename='images/plus_icon.png')}}" width="25" class="mx-auto d-block" data-bs-toggle="modal" data-bs-target="#empresa-Modal">
+                  <img src="{{url_for('static', filename='images/plus_icon.png')}}" width="25" class="mx-auto d-block" data-bs-toggle="modal" data-bs-target="#plan-Modal">
+              </div>
+          </div>
+      </div>
+  
+  
+      <!-- Empresa-Modal -->
+  <div class="modal fade" id="empresa-Modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Nueva Empresa</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/agregar_empresa" method="post">
+  
+                    <label> Nombre de la empresa</label>
+                    <input type="text" class="form-control mb-3" name="nombreEmp">
+  
+                    <label> Contacto</label>
+                    <input type="text" class="form-control mb-3" name="infoContacto">
+  
+                    <label> Plan Publicacion</label>
+                    <select class="form-select mb-3" name="idPlanPublicacion">
+                        {% for plan in planes %}
+                            <option value="{{ plan.id }}">{{ plan.descripcion }}</option>
+                        {% endfor %}
+                    </select>
+  
+                    <label> Fecha inicio de contrato</label>
+                    <input type="text" class="form-control mb-3" name="fechaInicioContrato" data-bs-datepicker>
+  
+                    <label> Fecha fin de contrato</label>
+                    <input type="text" class="form-control mb-3" name="fechaFinContrato" data-bs-datepicker>
+  
+                    <label> Modelo de  negocio</label>
+                    <input type="text" class="form-control mb-3" name="modeloNegocio">
+  
+                    <label> Requerimiento principal</label>
+                    <input type="text" class="form-control mb-3" name="requerimientoPrincipal">
+  
+                    <button type="submit" class="btn btn-primary w-100">Guardar</button>
+                </form>
+            </div>
+  
+        </div>
+    </div>
+  </div>
+  
+  
+    <!-- Plan-Modal -->
+  <div class="modal fade" id="plan-Modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Nuevo Plan</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+  
+          <form action="{{ url_for('registro_plan.agregar_plan')}}" method="post">
+            <label>Numero de plan</label>
+            <input type="text" class="form-control mb-3" name="nPlan">
+  
+            <label>Descripcion</label>
+            <textarea class="form-control mb-3" rows="5" name="descripcion"></textarea>
+  
+            <label>Costo</label>
+            <input type="number" class="form-control mb-3" name="costo">
+  
+            <label>Observaciones</label>
+            <textarea class="form-control mb-3" rows="5" name="observaciones"></textarea>
+  
+            <button type="submit" class="btn btn-primary w-100">Guardar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
 </body>
 </html>
