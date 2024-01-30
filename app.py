@@ -40,7 +40,7 @@ def login():
             return render_template('index.html', message=" Rol no reconocido")
 
     else:
-        return render_template('index.html', message=" Las credenciales no son correctas")
+        return render_template('index.html', message="    Las credenciales no son correctas")
     
 #esto es para dirigirnos a la tarea de usuario  
 @app.route('/tasks', methods = ['GET'])
