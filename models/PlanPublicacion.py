@@ -4,7 +4,7 @@ import Conexion.config as db
 registro_plan = Blueprint('registro_plan', __name__)
 
 
-@registro_plan.route('/agregar_plan', methods=['GET','POST'])
+@registro_plan.route('/agregar_plan', methods=['POST'])
 def agregar_plan():
         # Obtener datos del formulario
         nPlan = request.form['nPlan']
@@ -25,4 +25,4 @@ def agregar_plan():
         finally:
             cursor.close
 
-        return  "Guardado Correctamente" 
+        return  redirect (url_for('admin'))
