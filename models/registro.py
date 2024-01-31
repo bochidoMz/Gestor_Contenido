@@ -9,6 +9,8 @@ registro_usu = Blueprint('registro_usu', __name__)
 def mostrarFormularioRegistro():
     return render_template('Registrarse.html')
 
+#Agregar al Usuario
+
 @registro_usu.route('/user', methods=['POST'])
 def addUser():
     nombre = request.form['Nombre']
@@ -45,4 +47,51 @@ def addUser():
         return redirect(url_for('task'))
     else:
         return render_template('Registrarse.html', message="Por favor, completa todos los campos.")
+    
+#Ruta para Listar
+
+@registro_usu.route('/registro')
+def Listar():
+    cursor = db.conection.cursor()
+    cursor.execute("SELECT * FROM usuario")
+    myresult = cursor.fetchall()
+    
+    insertObject = []
+    columNames = [column [0] for column in cursor.description]
+    for record in myresult:
+        insertObject.append(dict(zip(columNames, record)))
+    cursor.close()
+    return render_template('Registrarse.html', data=insertObject)
+
+#Ruta para eliminar
+
+@registro_usu.route('/delete/<string:id>')
+def delete(id):
+    cursor = db.conection.cursor()
+    sql = "DELETE FROM usuario WHERE id= %s"
+    data = (id,)
+    cursor.execute(sql, data)
+    db.conection.commit()
+    return redirect(url_for("Registrarse.html"))
+
+#Ruta para editar
+
+@registro_usu.route('/edit/<string:id>', methods=['POST'])
+def edit(id):
+    nombre = request.form['Nombre']
+    apellido = request.form['Apellido']
+    email = request.form['Correo']
+    contraseña = request.form['Contraseña']
+    rol_str = request.form['Rol']
+    
+    if nombre and apellido and email and contraseña and rol_str:
+        cursor = db.conection.cursor()
+        sql = "UPDATE usuario SET nombreU = %s, apellidoU = %s, correoElectronico = %s, contraseña = %s, idRol = %s WHERE id = %s"
+        data = (nombre, apellido, email, contraseña, rol_str, id)
+        cursor.execute(sql, data)
+        db.conection.commit()
+        
+        return redirect(url_for('Registro.html'))
+    
+
 

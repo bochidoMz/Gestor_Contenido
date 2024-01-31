@@ -4,6 +4,7 @@ import secrets
 from models.registro import registro_usu
 from models.PlanPublicacion import registro_plan
 from models.registroEmpresa import registro_empresa
+from models.empresaplan import empresa_plan
 
 app = Flask(__name__)
 app.secret_key = secrets.token_bytes(16)
@@ -68,6 +69,7 @@ def registro():
 app.register_blueprint(registro_usu, url_prefix='/registro_usuario')
 app.register_blueprint(registro_plan, url_prefix='/registro_plan')
 app.register_blueprint(registro_empresa)
+app.register_blueprint(empresa_plan)
   
 if __name__ == ('__main__'):
         app.run(debug=True)
