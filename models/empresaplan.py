@@ -5,6 +5,7 @@ empresa_plan = Blueprint('empresa_plan', __name__)
 
 @empresa_plan.route('/plan_empresa', methods= ['POST'])
 def plan_empresa():
+    
     id_empresas = request.form.getlist('empresa')
     id_plan_publicacion = request.form.get('plan_publicacion')
     fecha_inicio = request.form.get('fecha_inicio')
@@ -27,6 +28,9 @@ def plan_empresa():
         return "error al agregar empresa plan", 500
     finally:
         cursor.close()
+
+
+
     
     
     

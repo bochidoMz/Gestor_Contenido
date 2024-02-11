@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for
-from flask_bcrypt import Bcrypt
+from flask import redirect, url_for, session
 import Conexion.config as db
 
 
@@ -7,7 +7,7 @@ registro_usu = Blueprint('registro_usu', __name__)
 
 @registro_usu.route('/registro', methods=['GET'])
 def mostrarFormularioRegistro():
-    return render_template('Registrarse.html')
+    return render_template('usuarios.html')
 
 #Agregar al Usuario
 
@@ -23,7 +23,7 @@ def addUser():
     rol = rol_mapping.get(rol_str)
 
     if rol is None:
-        return render_template('Registrarse.html', message="Rol no válido")
+        return render_template('usuarios.html', message="Rol no válido")
 
 
     if nombre and apellido and email and contraseña:
@@ -43,55 +43,82 @@ def addUser():
         cursor.execute(sql_login, data_login)
 
         db.conection.commit()
+        cursor.close()  # Cierra el cursor después de ejecutar las consultas
 
-        return redirect(url_for('task'))
+        session['email'] = email
+        session['name'] = nombre
+        session['surnames'] = apellido
+
+        # Redirigir nuevamente al formulario de registro
+        return redirect(url_for('usuarios'))
     else:
-        return render_template('Registrarse.html', message="Por favor, completa todos los campos.")
+        return render_template('usuarios.html', message="Por favor, completa todos los campos.")
     
-#Ruta para Listar
-
-@registro_usu.route('/registro')
-def Listar():
-    cursor = db.conection.cursor()
-    cursor.execute("SELECT * FROM usuario")
-    myresult = cursor.fetchall()
+    #Metodo Borrar
     
-    insertObject = []
-    columNames = [column [0] for column in cursor.description]
-    for record in myresult:
-        insertObject.append(dict(zip(columNames, record)))
-    cursor.close()
-    return render_template('Registrarse.html', data=insertObject)
-
-#Ruta para eliminar
-
-@registro_usu.route('/delete/<string:id>')
-def delete(id):
-    cursor = db.conection.cursor()
-    sql = "DELETE FROM usuario WHERE id= %s"
-    data = (id,)
-    cursor.execute(sql, data)
-    db.conection.commit()
-    return redirect(url_for("Registrarse.html"))
-
-#Ruta para editar
-
-@registro_usu.route('/edit/<string:id>', methods=['POST'])
-def edit(id):
-    nombre = request.form['Nombre']
-    apellido = request.form['Apellido']
-    email = request.form['Correo']
-    contraseña = request.form['Contraseña']
-    rol_str = request.form['Rol']
-    
-    if nombre and apellido and email and contraseña and rol_str:
-        cursor = db.conection.cursor()
-        sql = "UPDATE usuario SET nombreU = %s, apellidoU = %s, correoElectronico = %s, contraseña = %s, idRol = %s WHERE id = %s"
-        data = (nombre, apellido, email, contraseña, rol_str, id)
-        cursor.execute(sql, data)
-        db.conection.commit()
+@registro_usu.route('/delete/<int:id>', methods=['GET', 'POST'])
+def delete_user(id):
         
-        return redirect(url_for('Registro.html'))
+            cursor = db.conection.cursor()
+
+            # Elimina primero los registros relacionados en la tabla login
+            sql_login = "DELETE FROM login WHERE idUsuario = %s"
+            cursor.execute(sql_login, (id,))
+            db.conection.commit()
+
+            # Luego elimina al usuario de la tabla usuario
+            sql_usuario = "DELETE FROM usuario WHERE id = %s"
+            cursor.execute(sql_usuario, (id,))
+            db.conection.commit()
+
+            cursor.close()
+
+            return redirect(url_for('usuarios'))   
+  # Redirige a la vista de usuarios después de eliminar
+
+# Agrega el método para editar usuarios
+@registro_usu.route('/edit/<int:id>', methods=['GET', 'POST'])
+def edit_user(id):
+    if request.method == 'POST':
+        nombre = request.form['Nombre']
+        apellido = request.form['Apellido']
+        email = request.form['Correo']
+        contraseña = request.form['Contraseña']
+        rol = request.form['Rol']
+        
+        cursor = db.conection.cursor()
+        # Actualizar tabla 'usuario'
+        sql_usuario = "UPDATE usuario SET nombreU = %s, apellidoU = %s WHERE id = %s"
+        cursor.execute(sql_usuario, (nombre, apellido, id))
+
+        # Actualizar tabla 'login'
+        sql_login = "UPDATE login SET correoElectronico = %s, contraseña = %s WHERE idUsuario = %s"
+        cursor.execute(sql_login, (email, contraseña, id))
+
+        db.conection.commit()
+        cursor.close()
+            
+        # Redirigir a la página de usuarios después de la actualización exitosa
+        return redirect(url_for('usuarios'))  
+       
+    else:
+        cursor = db.conection.cursor()
+        sql = "SELECT u.id, u.nombreU, u.apellidoU, l.correoElectronico, r.descripcion AS rol FROM usuario u \
+               INNER JOIN login l ON u.id = l.idUsuario \
+               INNER JOIN rol r ON u.idRol = r.id \
+               WHERE u.id = %s"
+        cursor.execute(sql, (id,))
+        user = cursor.fetchone()
+        cursor.close()
+        return render_template('usuarios.html', user=user)
+
+        
+    
+
+
+
+
+
     
 
 
