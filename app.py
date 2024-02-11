@@ -132,6 +132,10 @@ def usuarios():
 
     cursor.close()
     return render_template('usuarios.html', users=users)
+
+@app.route('/admin/planes', methods=['GET'])
+def planes():
+     return render_template('planes.html')
     
 @app.route('/logout') #esto es para el cierre de cesion
 def logout():
