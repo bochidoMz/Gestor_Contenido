@@ -22,15 +22,67 @@
                 <a class="nav-link active" aria-current="page" href="admin/usuarios">Usuarios</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="admin/planes">PLanes</a>
+                <a class="nav-link" href="admin/empresas">Empresas</a>
               </li>
-              
             </ul>
             <span style="color: aliceblue;">Bienvenido/a Administrador/a {{session['name']}} {{session['surnames']}}<a href="{{url_for('logout')}}" class="mx-3">Cerrar sesiòn</a></span>
           </div>
         </div>
       </nav>
         
+  
+   <!-- Empresa-Modal -->
+<div class="modal fade" id="empresa-Modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Nueva Empresa</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            {% if message %}
+                    <div class="alert alert-{{ message_type }} alert-dismissible fade show" role="alert">
+                        <strong>{{ message }}</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+              <form action="/agregar_empresa" method="post">
+
+                  <label> Nombre de la empresa</label>
+                  <input type="text" class="form-control mb-3" name="nombreEmp">
+
+                  <label> Contacto</label>
+                  <input type="text" class="form-control mb-3" name="infoContacto">
+
+                  <label> Email</label>
+                  <input type="text" class="form-control mb-3" name="email">
+
+                  <label> Telefono</label>
+                  <input type="text" class="form-control mb-3" name="telefono">
+
+                  <label> Direccion</label>
+                  <input type="text" class="form-control mb-3" name="direccion">
+
+                  <label> Modelo de Negocio</label>
+                  <input type="text" class="form-control mb-3" name="modeloNegocio">
+
+                  <label> Redes Sociales </label>
+                  <input type="text" class="form-control mb-3" name="direccionRedesSociales">
+
+                  <label> Pagina web </label>
+                  <input type="text" class="form-control mb-3" name="direccionPáginaWeb">
+                  
+                  <label> Requerimiento Principal </label>
+                  <input type="text" class="form-control mb-3" name="requerimientoPrincipal">
+
+                  <button type="submit" class="btn btn-primary w-100">Guardar</button>
+              </form>
+          </div>
+
+      </div>
+  </div>
+</div>
+  
   
     <!-- Plan-Modal -->
   <div class="modal fade" id="plan-Modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -165,14 +217,13 @@
 <table class="table table-bordered">
   <thead>
     <tr>
-      <th scope="col">Nombre</th>
+      <th scope="col">Nombre de la empresa</th>
       <th scope="col">Información de contacto</th>
       <th scope="col">Email</th>
       <th scope="col">Teléfono</th>
       <th scope="col">Dirección</th>
       <th scope="col">Modelo de negocio</th>
-      <th scope="col">Redes Sociales</th>
-      <th scope="col">Página Web</th>
+      <th scope="col">Plataforma asociada</th>
     </tr>
   </thead>
   <tbody>
@@ -184,16 +235,24 @@
       <td>{{ company.Telefono }}</td>
       <td>{{ company.Direccion }}</td>
       <td>{{ company.modeloNegocio }}</td>
-      <td>{{ company.DireccionRedesSociales }}</td>
-      <td>{{ company.DireccionPáginaWeb }}</td>
+      <td>{{ company.nombrePlataforma }}</td>  <!-- Mostrar el nombre de la plataforma asociada -->
     </tr>
     {% endfor %}
   </tbody>
 </table>
 
     </div>
+    
+
+
+
+
+
+
     </div>
   </div>
 </div>
+
+
 </body>
 </html>

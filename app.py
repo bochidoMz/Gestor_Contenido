@@ -90,8 +90,8 @@ def task():
 def admin():
     cursor = db.conection.cursor()
 
-    # Consulta para obtener la lista de empresas
-    cursor.execute("SELECT nombreEmp, infoContacto, Email, Telefono, Direccion, modeloNegocio, DireccionRedesSociales, DireccionPáginaWeb FROM empresaAsociada;")
+    # Consulta para obtener la lista de empresas con información de la plataforma asociada
+    cursor.execute("SELECT e.nombreEmp, e.infoContacto, e.Email, e.Telefono, e.Direccion, e.modeloNegocio, p.nombrePlataforma FROM empresaAsociada e INNER JOIN plataforma p ON e.idPlataforma = p.id;")
     companies_result = cursor.fetchall()
 
     # Formatear los resultados de las empresas
@@ -132,10 +132,6 @@ def usuarios():
 
     cursor.close()
     return render_template('usuarios.html', users=users)
-
-@app.route('/admin/planes', methods=['GET'])
-def planes():
-     return render_template('planes.html')
     
 @app.route('/logout') #esto es para el cierre de cesion
 def logout():
