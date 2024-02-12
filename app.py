@@ -5,6 +5,7 @@ from models.registro import registro_usu
 from models.PlanPublicacion import registro_plan
 from models.registroEmpresa import registro_empresa
 from models.empresaplan import empresa_plan
+from models.managerPerfil import manager_perfil
 
 app = Flask(__name__)
 app.secret_key = secrets.token_bytes(16)
@@ -47,42 +48,7 @@ def login():
 
 @app.route('/tasks', methods = ['GET'])
 def task():
-    
-        # Verificar si el usuario está autenticado
-    if 'email' not in session:
-        return redirect(url_for('home'))  # Redirigir al inicio de sesión si el usuario no está autenticado
-
-    # Obtener el ID del usuario actualmente autenticado
-    email = session['email']
-    cur = db.conection.cursor(dictionary=True)
-    query = "SELECT id FROM login WHERE correoElectronico = %s"
-    cur.execute(query, (email,))
-    user_id = cur.fetchone()['id']
-    cur.close()
-
-    # Consulta para obtener las tareas asignadas al usuario con detalles de empresa asociada y plan de publicación
-    cur = db.conection.cursor(dictionary=True)
-    query = query = """
-    SELECT 
-        t.id, 
-        t.fechaInicio, 
-        t.fechaFin, 
-        t.contenido, 
-        ep.descripcion AS descripcionEstadoPublicacion, 
-        ea.nombreEmp AS empresaAsociada, 
-        pp.descripcion AS planPublicacion 
-    FROM tarea t
-    LEFT JOIN empresaAsociada ea ON t.idEmpresaAsociada = ea.id
-    LEFT JOIN planPublicacion pp ON t.idPlanPublicacion = pp.id
-    LEFT JOIN estadoPublicacion ep ON t.idEstadoPublicacion = ep.id
-    WHERE t.idUsuario = %s
-"""
-    cur.execute(query, (user_id,))
-    tareas = cur.fetchall()
-    cur.close()
-
-    
-    return render_template('tasks.html', tareas=tareas)
+  return render_template('tasks.html')
 
 #esto es para dirigirnos al perfil del Administrador
 
@@ -91,7 +57,7 @@ def admin():
     cursor = db.conection.cursor()
 
     # Consulta para obtener la lista de empresas con información de la plataforma asociada
-    cursor.execute("SELECT e.nombreEmp, e.infoContacto, e.Email, e.Telefono, e.Direccion, e.modeloNegocio, p.nombrePlataforma FROM empresaAsociada e INNER JOIN plataforma p ON e.idPlataforma = p.id;")
+    cursor.execute("SELECT e.*, p.nombrePlataforma FROM empresaAsociada e INNER JOIN plataforma p ON e.idPlataforma = p.id;")
     companies_result = cursor.fetchall()
 
     # Formatear los resultados de las empresas
@@ -99,16 +65,61 @@ def admin():
     column_names = [column[0] for column in cursor.description]
     for record in companies_result:
         companies.append(dict(zip(column_names, record)))
+        
+    # Obtener las plataformas disponibles
+    cursor.execute("SELECT * FROM plataforma;")
+    plataformas_result = cursor.fetchall()
+    plataformas = [dict(id=plataforma[0], nombrePlataforma=plataforma[1]) for plataforma in plataformas_result]
 
     cursor.close()
+    
+    print(plataformas)
 
-    return render_template('admin.html', companies=companies)
+    return render_template('admin.html', companies=companies, plataformas = plataformas)
 
 #esto es para dirigirnos al perfil del Manager
 
-@app.route('/manager', methods = ['GET'])
+@app.route('/manager', methods=['GET'])
 def manager():
-    return render_template('manager.html')
+    ultima_empresa = None
+    ultimo_plan = None
+    todas_empresas = []
+    todos_planes = []
+
+    cursor = db.conection.cursor()
+
+    # Obtener la última empresa y el último plan por defecto
+    cursor.execute("SELECT id, nombreEmp FROM empresaAsociada ORDER BY id DESC LIMIT 1")
+    ultima_empresa_row = cursor.fetchone()
+    if ultima_empresa_row:
+        ultima_empresa = ultima_empresa_row[1]  # Nombre de la última empresa
+        id_ultima_empresa = ultima_empresa_row[0]
+        todas_empresas.append((id_ultima_empresa, ultima_empresa))
+
+    cursor.execute("SELECT id, descripcion FROM planPublicacion ORDER BY id DESC LIMIT 1")
+    ultimo_plan_row = cursor.fetchone()
+    if ultimo_plan_row:
+        ultimo_plan = ultimo_plan_row[1]  # Descripción del último plan
+        id_ultimo_plan = ultimo_plan_row[0]
+        todos_planes.append((id_ultimo_plan, ultimo_plan))
+
+    # Obtener todas las empresas y planes
+    cursor.execute("SELECT id, nombreEmp FROM empresaAsociada")
+    todas_empresas.extend(cursor.fetchall())
+
+    cursor.execute("SELECT id, descripcion FROM planPublicacion")
+    todos_planes.extend(cursor.fetchall())
+    
+    cursor.execute("SELECT e.nombreEmp, p.descripcion, fechaInicioContrato, fechafinContrato, ObjetivoPrincipal FROM empresaPlan ep JOIN empresaAsociada e ON ep.idEmpresa = e.id JOIN planPublicacion p ON ep.idPlanPublicacion = p.id")
+    datos_empresa_plan = cursor.fetchall()
+
+    cursor.close()
+
+    return render_template('manager.html', ultima_empresa=ultima_empresa, ultimo_plan=ultimo_plan, todas_empresas=todas_empresas, todos_planes=todos_planes, datos_empresa_plan=datos_empresa_plan)
+
+@app.route('/manager/asignarTareas', methods=['GET'])
+def asignar():
+    return render_template('asignarTareas.html')
 
 #esto es para dirigirnos a los usuarios del admin
 
@@ -133,6 +144,22 @@ def usuarios():
     cursor.close()
     return render_template('usuarios.html', users=users)
     
+@app.route('/admin/planes', methods=['GET'])
+def planes():
+    cursor = db.conection.cursor()
+    cursor.execute("SELECT * FROM planPublicacion")
+    planes_result = cursor.fetchall()
+    
+    planes = []
+    column_names = [column[0] for column in cursor.description]
+    for record in planes_result:
+        planes.append(dict(zip(column_names, record)))
+    
+    cursor.close()
+
+    
+    return render_template('planes.html', planes=planes)
+    
 @app.route('/logout') #esto es para el cierre de cesion
 def logout():
     session.clear()
@@ -147,6 +174,24 @@ app.register_blueprint(registro_usu)
 app.register_blueprint(registro_plan, url_prefix='/registro_plan')
 app.register_blueprint(registro_empresa)
 app.register_blueprint(empresa_plan)
+app.register_blueprint(manager_perfil)
+
+
+# Ruta para agregar una nueva tarea
+@app.route('/calendar', methods=['GET', 'POST'])
+def calendario():
+    if request.method == 'POST':
+        fecha = request.form['fecha']
+        descripcion = request.form['descripcion']
+        estado = request.form['estado']
+        
+        cursor = db.conection.cursor
+
+        # Insertar nueva tarea en la base de datos
+        cursor.execute("INSERT INTO tareas (fecha, descripcion, estado) VALUES (%s, %s, %s)", (fecha, descripcion, estado))
+        db.commit()
+
+    return  render_template('calendario.html')
 
 
 

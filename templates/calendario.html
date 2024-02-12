@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario de Tareas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="calendar">
+        {% for tarea in tareas %}
+            <div class="task {{ tarea[3] }}">{{ tarea[2] }}</div>
+        {% endfor %}
+    </div>
+    <form action="{{ url_for('agregar_tarea') }}" method="post">
+        <label for="fecha">Fecha:</label>
+        <input type="date" id="fecha" name="fecha" required>
+        <label for="descripcion">Descripción:</label>
+        <input type="text" id="descripcion" name="descripcion" required>
+        <label for="estado">Estado:</label>
+        <select id="estado" name="estado" required>
+            <option value="completado">Completado</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="atrasado">Atrasado</option>
+        </select>
+        <button type="submit">Agregar Tarea</button>
+    </form>
+</body>
+</html>
